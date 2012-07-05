@@ -3,13 +3,16 @@
 require_once DRUPAL_ROOT . '/' . drupal_get_path('module', 'station') . '/dayhour.inc';
 
 /**
- * @todo Please document this function.
- * @see http://drupal.org/node/1354
+ * Implements hook_help().
  */
 function station_help($path, $arg) {
   switch ($path) {
     case 'admin/config/station':
       return t('Configure the core station settings. These settings are used by all of the station modules.');
+      break;
+    case 'admin/help#station';
+      return t('A module to manage radiostations');
+      break;
   }
 }
 
@@ -83,13 +86,24 @@ function station_theme() {
 }
 
 /**
+ * Implements hook_block_info().
+ */
+function station_block_info() {
+  $blocks['current_program'] = array(
+    'info' => t('Station: Current Program'),
+    'region' => 'left',
+    'cache' => BLOCK_NO_CACHE,
+  );
+  return $blocks;
+}
+
+/**
  * Implements hook_block_view().
  */
-function station_block_view($delta) {
-  // TODO Rename block deltas (e.g. delta-0) to readable strings.
+function station_block_view($delta = '') {
   if (user_access('view station schedule content')) {
     switch ($delta) {
-      case 'delta-0':
+      case 'current_program':
         return array(
           'subject' => t('On Air'),
           'content' => station_block_current_program(),
@@ -100,27 +114,7 @@ function station_block_view($delta) {
 }
 
 /**
- * Implements hook_block_info().
- */
-function station_block_info() {
-  // TODO Rename block deltas (e.g. delta-0) to readable strings.
-  $blocks['delta-0'] = array(
-    'info' => t('Station: Current Program'),
-    'status' => TRUE,
-    'region' => 'left',
-    'cache' => BLOCK_NO_CACHE,
-  );
-  return $blocks;
-}
-
-/**
- * Implements hook_block().
- */
-function station_block_OLD($op = 'list', $delta = 0, $edit = array()) { }
-
-/**
- * @todo Please document this function.
- * @see http://drupal.org/node/1354
+ * Doesn't seem to do anything
  */
 function station_page() {
   $output = '';
