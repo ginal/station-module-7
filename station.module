@@ -91,8 +91,7 @@ function station_theme() {
 function station_block_info() {
   $blocks['current_program'] = array(
     'info' => t('Station: Current Program'),
-    'region' => 'left',
-    'cache' => BLOCK_NO_CACHE,
+    'cache' => DRUPAL_NO_CACHE,
   );
   return $blocks;
 }
@@ -114,7 +113,10 @@ function station_block_view($delta = '') {
 }
 
 /**
- * Doesn't seem to do anything
+ * Callback of /station menu item.
+ * menu_get_item() without an arguments returns the current's page menu_router item (an associative array).
+ * system_admin_menu_block() creates the content for an admin page by quering the database for pages that have the given page as parent.
+ * theme_admin_block_content() themes content that has been created by the previous function.
  */
 function station_page() {
   $output = '';
@@ -127,12 +129,14 @@ function station_page() {
 
 /**
  * AJAX form handler.
+ * TODO: rewrite, it is used by the playlist module and gets called on /station/ahah/playlist page.
  */
 function station_ajax_form_handler() {
   $form_state = array(
     'storage' => NULL,
     'submitted' => FALSE,
   );
+  // $form_build_id is randomly generated when a form is initializing
   $form_build_id = $_POST['form_build_id'];
 
   // Get the form from the cache.
@@ -159,16 +163,6 @@ function station_ajax_form_handler() {
 }
 
 /**
- * Determine if we have a station archive module running locally or access to a
- * remote one.
- *
- * @return boolean
- */
-function station_has_archive() {
-  return (module_exists('station_archive') || variable_get('station_remote_archive_url', FALSE));
-}
-
-/**
  * Determine if we have a station schedule module running locally or access to a
  * remote one.
  *
@@ -176,21 +170,6 @@ function station_has_archive() {
  */
 function station_has_schedule() {
   return (module_exists('station_schedule') || variable_get('station_remote_schedule_url', FALSE));
-}
-
-/**
- * If there's an archive, return the URL.
- *
- * @return FALSE or string URL.
- */
-function station_get_archive_url() {
-  if (module_exists('station_archive')) {
-    return 'station/archives/';
-  }
-  elseif ($url = variable_get('station_remote_archive_url', FALSE)) {
-    return $url . 'station/archives/';
-  }
-  return FALSE;
 }
 
 /**
@@ -220,7 +199,9 @@ function station_get_schedules() {
         $schedules = $cache->data;
       }
       else {
-        $schedules = xmlrpc(check_url($url . '/xmlrpc.php'), 'station.schedule.get.list');
+        // TO_CHECK
+        //$schedules = xmlrpc(check_url($url . '/xmlrpc.php'), 'station.schedule.get.list');
+        $schedules = xmlrpc(check_url($url . '/xmlrpc.php'), array('station.schedule.get.list' => array()));
         if (xmlrpc_errno()) {
           watchdog('station', 'Failed to load schedule info remotely. Error %code : %message', array('%code' => xmlrpc_errno(), '%message' => xmlrpc_error_msg()), WATCHDOG_ERROR);
           return FALSE;
@@ -328,7 +309,11 @@ function station_get_program_at($timestamp, $schedule_nid) {
     }
     else {
       // if it isn't cached get the program info from the server
-      $program = xmlrpc(check_url($url . '/xmlrpc.php'), 'station.program.get.at', $timestamp, $schedule_nid);
+      // TO_CHECK
+      //$program = xmlrpc(check_url($url . '/xmlrpc.php'), 'station.program.get.at', $timestamp, $schedule_nid);
+      //$program = xmlrpc(check_url($url . '/xmlrpc.php'), array('station.program.get.at' => array()), array('timestamp' => $timestamp, 'schedule_nid' => $schedule_nid));
+      $program = xmlrpc(check_url($url . '/xmlrpc.php'), array('station.program.get.at' => array($timestamp, $schedule_nid)));
+
       if (xmlrpc_errno()) {
         watchdog('station', 'Failed to load program info remotely. Error %code : %message', array('%code' => xmlrpc_errno(), '%message' => xmlrpc_error_msg()), WATCHDOG_ERROR);
         return FALSE;
@@ -404,7 +389,7 @@ function theme_station_streams($variables) {
 
 
 /**
- * Convert an array to a comma separates list with an 'add' between the last
+ * Convert an array to a comma separated list with an 'add' between the last
  * terms.
  *
  * @param $array array of items
@@ -415,8 +400,10 @@ function station_anded_list($array) {
       return '';
     case 1:
       return array_pop($array);
+    // Why no break?
     default:
       $last = array_pop($array);
+      // Shouldn't it be @list-items so as to pass text through check_plain()?
       return t('!list-items and !last-item', array('!list-items' => implode(', ', $array), '!last-item' => $last));
   }
 }
@@ -455,14 +442,14 @@ function station_today() {
 }
 
 /**
- * Function to send notices of station changes via hook_station_notices.
+ * Function to send notices of station changes via hook_station_notice.
  */
 function _station_send_notice($type, $op, $data) {
   module_invoke_all('station_notice', $type, $op, $data);
 }
 
 /**
- * Implementation of hook_station_notices to display simple notices about
+ * Implements hook_station_notices to display simple notices about
  * station changes.
  *
  * @param $type 'dj' or 'schedule'
@@ -477,10 +464,10 @@ function _station_station_notice($type, $op, $data) {
     $uid = $data['uid'];
     switch ($op) {
       case 'add':
-        drupal_set_message("$sid adding $uid to $nid");
+        drupal_set_message(check_plain("$sid adding $uid to $nid"));
         break;
       case 'remove':
-        drupal_set_message("$sid removing $uid from $nid");
+        drupal_set_message(check_plain("$sid removing $uid from $nid"));
         break;
     }
   }
@@ -490,13 +477,13 @@ function _station_station_notice($type, $op, $data) {
     $pid = $data['program_nid'];
     switch ($op) {
       case 'add':
-        drupal_set_message("$sid adding $iid to $pid");
+        drupal_set_message(check_plain("$sid adding $iid to $pid"));
         break;
       case 'change':
-        drupal_set_message("$sid changing $iid on $pid");
+        drupal_set_message(check_plain("$sid changing $iid on $pid"));
         break;
       case 'remove':
-        drupal_set_message("$sid removing $iid from $pid");
+        drupal_set_message(check_plain("$sid removing $iid from $pid"));
         break;
     }
   }

@@ -1,5 +1,9 @@
 <?php
-
+/**
+ * @file
+ * The administration page settings form.
+ *
+ */
 
 /**
  * Admin settings form.
@@ -84,7 +88,10 @@ function station_admin_settings_validate($form, &$form_state) {
     // check station url
     if ($url = $form_state['values']['station_remote_schedule_url']) {
       $url = check_url($url . '/xmlrpc.php');
-      $ret = xmlrpc($url, 'station.program.get.at', REQUEST_TIME, 0);
+      // TO_CHECK
+      //$ret = xmlrpc($url, 'station.program.get.at', REQUEST_TIME, 0);
+      //$ret = xmlrpc($url, array('station.program.get.at' => array()), array('REQUEST_TIME' => REQUEST_TIME,'1' => 0));
+      $ret = xmlrpc($url, array('station.program.get.at' => array(REQUEST_TIME, 0)));
       if (xmlrpc_error_msg()) {
         form_set_error('station_remote_schedule_url',
           t('You must provide a a valid URL for a Drupal site with the station schedule module installed.<br />Specific error: %xmlrpc-error', array('%xmlrpc-error' => xmlrpc_error_msg()))

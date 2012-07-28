@@ -1,5 +1,9 @@
 <?php
-
+/**
+ * @file
+ * Helper functions for day and time handling.
+ *
+ */
 
 // There are 1440 minutes in a day (60minute * 24hours = 1day).
 define('MINUTES_IN_DAY', 1440);
@@ -53,7 +57,7 @@ function station_valid_hour($hour) {
  * @param $day
  *   An integer from 0-6, or a case in-sensitive, English day name.
  * @return
- *   An nteger between 0 and 6 (Sunday, Monday, ... , Saturday).
+ *   An integer between 0 and 6 (Sunday, Monday, ... , Saturday).
  */
 function station_valid_day($day) {
   if (is_numeric($day)) {

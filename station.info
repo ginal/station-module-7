@@ -2,9 +2,3 @@ name = Station
 description = Core of station module for running an internet radio station.
 package = Station
 core = 7.x
-; Information added by drupal.org packaging script on 2011-02-25
-;version = "6.x-2.x-dev"
-;core = 7.x
-;project = "station"
-;datestamp = "1298620269"
-
