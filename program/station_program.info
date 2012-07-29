@@ -1,15 +1,8 @@
 name = Station Program
 description = Provides a simple program node for schedule.
 package = Station
-core=6.x
+core=7.x
 dependencies[] = station
 dependencies[] = views
-dependencies[] = content
 dependencies[] = link
 dependencies[] = text
-; Information added by drupal.org packaging script on 2011-02-25
-version = "6.x-2.x-dev"
-core = 7.x
-project = "station"
-datestamp = "1298620269"
-
