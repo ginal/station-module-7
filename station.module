@@ -42,7 +42,7 @@ function station_menu() {
   $items['station'] = array(
     'title' => 'Station',
     'page callback' => 'station_page',
-    'access arguments' => array('access content'),
+    'access arguments' => array('view published content'),
   );
   return $items;
 }
