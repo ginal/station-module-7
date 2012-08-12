@@ -396,7 +396,7 @@ function station_schedule_views_default_views() {
     'type' => 'none',
   ));
   $handler->override_option('empty', 'There are no programs scheduled for this day.');
-  $handler->override_option('empty_format', '1');
+  $handler->override_option('empty_format', 'plain_text');
   $handler->override_option('items_per_page', 0);
   $handler->override_option('style_plugin', 'table');
   $handler->override_option('style_options', array(
