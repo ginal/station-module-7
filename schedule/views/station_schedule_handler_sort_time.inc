@@ -28,6 +28,10 @@ class station_schedule_handler_sort_time extends views_handler_sort {
   function query() {
     $this->ensure_my_table();
 
+    $minute = station_minute_from_local_ts();
+    $station_current_minute = $minute;
+    $station_current_day_in_minutes = $minute - ($minute % MINUTES_IN_DAY);
+
     $minutes_in_day = MINUTES_IN_DAY;
     $minutes_in_week = MINUTES_IN_WEEK;
 
@@ -41,7 +45,7 @@ class station_schedule_handler_sort_time extends views_handler_sort {
         break;
 
       case 'now':
-        $formula = "(($this->table_alias.$this->real_field - ***STATION_CURRENT_MINUTE***) + $minutes_in_week) % $minutes_in_week";
+        $formula = "(($this->table_alias.$this->real_field - $station_current_minute) + $minutes_in_week) % $minutes_in_week";
         break;
 
       default:

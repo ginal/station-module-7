@@ -1,7 +1,4 @@
 <?php
-/**
- * @file
- */
 
 class station_schedule_handler_filter_time extends views_handler_filter_numeric {
   // Hide a bunch of the operators.
@@ -11,6 +8,8 @@ class station_schedule_handler_filter_time extends views_handler_filter_numeric 
     unset($operators['between'], $operators['not between']);
     // NULLs don't make sense since we require values for start and finish.
     unset($operators['empty'], $operators['not empty']);
+    // Regular expressions won't be used.
+    unset($operators['regular_expression']);
     return $operators;
   }
 
@@ -41,14 +40,14 @@ class station_schedule_handler_filter_time extends views_handler_filter_numeric 
       '#size' => 10,
       '#default_value' => $this->value['offset'],
       '#description' => t('Offset in minutes, e.g. -60 for one hour previous, 1440 for one day in the future.'),
-      '#process' => array('views_process_dependency'),
+      '#process' => array('ctools_dependent_process'),
       '#dependency' => array('radio:options[value][mode]' => array('now', 'today')),
     );
     $form['value']['value'] = array(
       '#type' => 'station_schedule_daytime',
       '#title' => check_plain($form['value']['value']['#title']),
       '#default_value' => $this->value['value'],
-      '#process' => array('expand_station_schedule_daytime', 'views_process_dependency'),
+      '#process' => array('expand_station_schedule_daytime', 'ctools_dependent_process'),
       '#dependency' => $form['value']['value']['#dependency'] + array('radio:options[value][mode]' => array('minutes')),
       '#dependency_count' => 2,
     );
@@ -96,39 +95,40 @@ class station_schedule_handler_filter_time extends views_handler_filter_numeric 
   function query() {
     $this->ensure_my_table();
 
-    $field = "$this->table_alias.$this->real_field";
+    $minute = station_minute_from_local_ts();
+    $station_current_minute = $minute;
+    $station_current_day_in_minutes = $minute - ($minute % MINUTES_IN_DAY);
+    
+    $field = $this->table_alias . "." . $this->real_field;
     $offset = (int) $this->value['offset'];
     $min_in_day = MINUTES_IN_DAY;
 
     $info = $this->operators();
     if (!empty($info[$this->operator]['method'])) {
-      $formula = $field . ' ' . $this->operator . ' ';
-      $params = array();
+      $operator = $this->operator;
       $tokens = array(
-        'now' => '***STATION_CURRENT_MINUTE***',
-        'today' => '***STATION_CURRENT_DAY_IN_MINUTES***',
+        'now' => $station_current_minute,
+        'today' => $station_current_day_in_minutes,
       );
       if (isset($tokens[$this->value['mode']])) {
         if (empty($offset)) {
-          $formula .= $tokens[$this->value['mode']];
+          $value = $tokens[$this->value['mode']];
         }
         else {
           // If there's an offset we need to make sure that it wraps at the
           // ends of the week.
           $minutes_in_week = MINUTES_IN_WEEK;
-          $formula .= "({$tokens[$this->value['mode']]} + %d + {$minutes_in_week}) %% {$minutes_in_week}";
-          $params[] = $offset;
+          $value = ($tokens[$this->value['mode']] + $offset + $minutes_in_week) % $minutes_in_week;
         }
       }
       elseif ('at' == $this->value['mode']) {
-        $formula .= '%d';
-        $params[] = $this->value['value'];
+        $value = $this->value['value'];
       }
       else {
         // Unknown.
         return;
       }
-      $this->query->add_where($this->options['group'], $formula, $params);
+      $this->query->add_where($this->options['group'], $field, $value, $operator);
     }
     return;
   }

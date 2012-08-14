@@ -202,7 +202,7 @@ function station_schedule_views_data() {
     'relationship' => array(
       'base' => 'node',
       'base field' => 'nid',
-      'field' => 'schedule_nid',
+      'field' => 'program_nid',
       'handler' => 'views_handler_relationship',
       'label' => t('Program'),
     ),
