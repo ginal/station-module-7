@@ -1,4 +1,7 @@
 <?php
+/**
+ * @file
+ */
 
 class station_schedule_handler_filter_time extends views_handler_filter_numeric {
   // Hide a bunch of the operators.

@@ -13,157 +13,65 @@ function station_schedule_install() {
   $dj_role = variable_get('station_schedule_dj_role', DRUPAL_AUTHENTICATED_RID);
   $dj_title = variable_get('station_schedule_dj_title', 'DJs');
 
-field_create_field(array(
-  'translatable' => '0',
-  'entity_types' => array(),
-  'settings' => array(
-    'referenceable_roles' => array(
-      2 => '2',
-      3 => 0,
-    ),
-    'referenceable_status' => array(
-      1 => '1',
-      0 => 0,
-    ),
-    'view' => array(
-      'view_name' => '',
-      'display_name' => '',
-      'args' => array(),
-    ),
-  ),
-  'storage' => array(
-    'type' => 'field_sql_storage',
-    'settings' => array(),
-    'module' => 'field_sql_storage',
-    'active' => '1',
-    'details' => array(
-      'sql' => array(
-        'FIELD_LOAD_CURRENT' => array(
-          'field_data_field_station_program_dj' => array(
-            'uid' => 'field_station_program_dj_uid',
-          ),
-        ),
-        'FIELD_LOAD_REVISION' => array(
-          'field_revision_field_station_program_dj' => array(
-            'uid' => 'field_station_program_dj_uid',
-          ),
-        ),
-      ),
-    ),
-  ),
-  'foreign keys' => array(
-    'uid' => array(
-      'table' => 'users',
-      'columns' => array(
-        'uid' => 'uid',
-      ),
-    ),
-  ),
-  'indexes' => array(
-    'uid' => array(
-      'uid',
-    ),
-  ),
-  'id' => '25',
-  'field_name' => 'field_station_program_dj',
-  'type' => 'user_reference',
-  'module' => 'user_reference',
-  'active' => '1',
-  'locked' => '0',
-  'cardinality' => FIELD_CARDINALITY_UNLIMITED,
-  'deleted' => '0',
-  'columns' => array(
-    'uid' => array(
-      'type' => 'int',
-      'unsigned' => TRUE,
-      'not null' => FALSE,
-    ),
-  ),
-  'bundles' => array(
-    'node' => array(
-      'station_program',
-    ),
-  ),
-));
-
-field_create_instance(array(
-  'label' => st('DJs'),
-  'widget' => array(
-    'weight' => '2',
-    'type' => 'user_reference_autocomplete',
-    'module' => 'user_reference',
-    'active' => 1,
+  field_create_field(array(
+    'translatable' => '0',
+    'entity_types' => array(),
     'settings' => array(
-      'autocomplete_match' => 'contains',
-      'size' => '60',
-      'autocomplete_path' => 'user_reference/autocomplete',
+      'referenceable_roles' => array(
+        2 => '2',
+        3 => 0,
+      ),
+      'referenceable_status' => array(
+        1 => '1',
+        0 => 0,
+      ),
+      'view' => array(
+        'view_name' => '',
+        'display_name' => '',
+        'args' => array(),
+      ),
     ),
-  ),
-  'settings' => array(
-    'user_register_form' => FALSE,
-  ),
-  'display' => array(
-    'default' => array(
-      'label' => 'above',
-      'type' => 'user_reference_default',
+    'storage' => array(
+      'type' => 'field_sql_storage',
       'settings' => array(),
-      'module' => 'user_reference',
-      'weight' => 3,
+      'module' => 'field_sql_storage',
+      'active' => '1',
+      'details' => array(
+        'sql' => array(
+          'FIELD_LOAD_CURRENT' => array(
+            'field_data_field_station_program_dj' => array(
+              'uid' => 'field_station_program_dj_uid',
+            ),
+          ),
+          'FIELD_LOAD_REVISION' => array(
+            'field_revision_field_station_program_dj' => array(
+              'uid' => 'field_station_program_dj_uid',
+            ),
+          ),
+        ),
+      ),
     ),
-    'teaser' => array(
-      'type' => 'hidden',
-      'label' => 'above',
-      'settings' => array(),
-      'weight' => 0,
+    'foreign keys' => array(
+      'uid' => array(
+        'table' => 'users',
+        'columns' => array(
+          'uid' => 'uid',
+        ),
+      ),
     ),
-    'example_node_list' => array(
-      'type' => 'hidden',
-      'label' => 'above',
-      'settings' => array(),
-      'weight' => 0,
+    'indexes' => array(
+      'uid' => array(
+        'uid',
+      ),
     ),
-  ),
-  'required' => 0,
-  'description' => st("Enter the names of users you'd like to add as DJs. The users must be members of the authenticated user role."),
-  'default_value' => NULL,
-  'id' => '43',
-  'field_id' => '25',
-  'field_name' => 'field_station_program_dj',
-  'entity_type' => 'node',
-  'bundle' => 'station_program',
-  'deleted' => '0',
-));
-
-/*
-  # var_export(content_fields('field_station_program_dj', 'station_program'));
-  $dj_field = array(
+    'id' => '25',
     'field_name' => 'field_station_program_dj',
-    'type_name' => 'station_program',
-    'display_settings' => array(
-      'label' => array(
-        'format' => 'above',
-      ),
-      'teaser' => array(
-        'format' => 'default',
-      ),
-      'full' => array(
-        'format' => 'default',
-      ),
-      0 => array(
-        'format' => 'above',
-      ),
-      'token' => array(
-        'format' => 'default',
-      ),
-    ),
-    'widget_active' => '1',
-    'type' => 'userreference',
-    'required' => '0',
-    'multiple' => '1',
-    'db_storage' => '0',
-    'module' => 'userreference',
+    'type' => 'user_reference',
+    'module' => 'user_reference',
     'active' => '1',
-    'locked' => '1',
+    'locked' => '0',
+    'cardinality' => FIELD_CARDINALITY_UNLIMITED,
+    'deleted' => '0',
     'columns' => array(
       'uid' => array(
         'type' => 'int',
@@ -171,34 +79,60 @@ field_create_instance(array(
         'not null' => FALSE,
       ),
     ),
-    'referenceable_roles' => array(
-      $dj_role => $dj_role,
-    ),
-    'referenceable_status' => array(
-      1 => 1,
-      0 => 0,
-    ),
-    'advanced_view' => '',
-    'advanced_view_args' => '',
-    'widget' => array(
-      'reverse_link' => 0,
-      'default_value' => array(
-        0 => array(
-          'uid' => NULL,
-          '_error_element' => 'default_value_widget][field_station_program_dj][0][uid][uid',
-        ),
+    'bundles' => array(
+      'node' => array(
+        'station_program',
       ),
-      'default_value_php' => NULL,
-      'label' => $dj_title,
-      'weight' => '1',
-      'description' => st('Enter the names of users you\'d like to add as @dj-title. The users must be members of the %role-name role.', array('@dj-title' => $dj_title, '%role-name' => $roles[$dj_role])),
-      'type' => 'userreference_autocomplete',
-      'module' => 'userreference',
     ),
-  );
-*/
-  // Create the fields.
-  //content_field_instance_create($dj_field);
+  ));
+
+  field_create_instance(array(
+    'label' => st('DJs'),
+    'widget' => array(
+      'weight' => '2',
+      'type' => 'user_reference_autocomplete',
+      'module' => 'user_reference',
+      'active' => 1,
+      'settings' => array(
+        'autocomplete_match' => 'contains',
+        'size' => '60',
+        'autocomplete_path' => 'user_reference/autocomplete',
+      ),
+    ),
+    'settings' => array(
+      'user_register_form' => FALSE,
+    ),
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'type' => 'user_reference_default',
+        'settings' => array(),
+        'module' => 'user_reference',
+        'weight' => 3,
+      ),
+      'teaser' => array(
+        'type' => 'hidden',
+        'label' => 'above',
+        'settings' => array(),
+        'weight' => 0,
+      ),
+      'example_node_list' => array(
+        'type' => 'hidden',
+        'label' => 'above',
+        'settings' => array(),
+        'weight' => 0,
+      ),
+    ),
+    'required' => 0,
+    'description' => st("Enter the names of users you'd like to add as DJs. The users must be members of the authenticated user role."),
+    'default_value' => NULL,
+    'id' => '43',
+    'field_id' => '25',
+    'field_name' => 'field_station_program_dj',
+    'entity_type' => 'node',
+    'bundle' => 'station_program',
+    'deleted' => '0',
+  ));
 
   node_types_rebuild();
   $types = node_type_get_types();

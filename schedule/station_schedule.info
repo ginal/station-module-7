@@ -19,3 +19,4 @@ files[] = views/station_schedule_handler_filter_schedule_selected.inc
 files[] = views/station_schedule_handler_filter_time.inc
 files[] = views/station_schedule_handler_sort_time.inc
 files[] = views/station_schedule.views.inc
+files[] = views/station_schedule.views_default.inc

@@ -100,7 +100,7 @@ function station_block_info() {
  * Implements hook_block_view().
  */
 function station_block_view($delta = '') {
-  if (user_access('view station schedule content')) {
+  if (user_access('view_station_schedule_content')) {
     switch ($delta) {
       case 'current_program':
         return array(

@@ -1,0 +1,14 @@
+name = Station Playlist
+description = Provides a program playlist node type.
+package = Station
+core = 7.x
+dependencies[] = station
+dependencies[] = station_program
+dependencies[] = views
+dependencies[] = node_reference
+dependencies[] = date
+
+files[] = station_playlist.views.inc
+files[] = station_playlist.views_default.inc
+files[] = station_playlist.admin.inc
+
