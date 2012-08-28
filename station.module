@@ -136,6 +136,7 @@ function station_ajax_form_handler() {
     'storage' => NULL,
     'submitted' => FALSE,
   );
+print('asdf');
   // $form_build_id is randomly generated when a form is initializing
   $form_build_id = $_POST['form_build_id'];
 

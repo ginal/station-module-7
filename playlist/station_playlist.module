@@ -257,21 +257,25 @@ function station_playlist_form(&$node, $form_state) {
   // Figure out how many empty rows we have and decide if we need to add some
   // more.
   if (isset($node->tracks)) {
-    $num_empty_tracks = 5;
+    //$num_empty_tracks = 5;
+    $form_state['num_empty_tracks'] = 5;
     foreach ($node->tracks as $track) {
       if (!station_playlist_track_is_saveable($track)) {
-        $num_empty_tracks--;
+        $form_state['$num_empty_tracks']--;
       }
     }
   }
   else {
     // New playlists get 10 blank tracks.
-    $num_empty_tracks = 10;
+    //$num_empty_tracks = 10;
+    $form_state['num_empty_tracks'] = 10;
     $node->tracks = array();
   }
   $empty_track = station_playlist_get_empty_track();
-  for ($i = 0; $i < $num_empty_tracks; $i++) {
-    $node->tracks[] = $empty_track;
+  if (isset($form_state['clicked_button']['#parents'][0]) && $form_state['clicked_button']['#parents'][0] == 'add_more') { 
+    for ($i = 0; $i < $form_state['num_empty_tracks']; $i++) {
+      $node->tracks[] = $empty_track;
+    }
   }
 
   // Wrapper to hold all the tracks elements.
@@ -335,10 +339,10 @@ function station_playlist_form(&$node, $form_state) {
       '#type' => 'submit',
       '#name' => 'remove_' . $weight,
       '#value' => t('Remove'),
-      '#submit' => array('station_playlist_form_ahah_track_submit'),
+      '#submit' => array('station_playlist_form_ahah_track_submit_remove'),
       '#ajax' => array(
-        'path' => 'station/ahah/playlist',
-        //'callback' => 'station_playlist_ajax',
+        //'path' => 'station/ahah/playlist',
+        'callback' => 'station_playlist_ajax_callback',
         'wrapper' => 'station-playlist-tracks-wrapper',
         'method' => 'replace',
         'effect' => 'fade',
@@ -352,9 +356,10 @@ function station_playlist_form(&$node, $form_state) {
     '#type' => 'submit',
     '#value' => t('Add more'),
     '#weight' => 1,
-    '#submit' => array('station_playlist_form_ahah_track_submit'),
+    '#submit' => array('station_playlist_form_ahah_track_submit_add_more'),
     '#ajax' => array(
-      'path' => 'station/ahah/playlist',
+      //'path' => 'station/ahah/playlist',
+      'callback' => 'station_playlist_ajax_callback',
       'wrapper' => 'station-playlist-tracks-wrapper',
       'method' => 'replace',
       'effect' => 'fade',
@@ -368,9 +373,22 @@ function station_playlist_form(&$node, $form_state) {
 /**
  * A do nothing submit function to prevent the form from saving.
  */
-function station_playlist_form_ahah_track_submit($form, &$form_state) {
+function station_playlist_form_ahah_track_submit_remove($form, &$form_state) {
   // Set the form to rebuild and run submit handlers.
-  node_form_submit_build_node($form, $form_state);
+  //node_form_submit_build_node($form, $form_state);
+
+  // Check if a track should be removed.
+  if (isset($form_state['clicked_button']['#parents'][2]) && $form_state['clicked_button']['#parents'][2] == 'remove') {
+    $delta = $form_state['clicked_button']['#parents'][1];
+    unset($form_state['values']['tracks'][$delta]);
+  }
+  $form_state['rebuild'] = TRUE;
+  node_form_submit_build_node($form, $form_state);  
+}
+
+function station_playlist_form_ahah_track_submit_add_more($form, &$form_state) {
+  $form_state['num_empty_tracks']++;
+  $form_state['rebuild'] = TRUE;
 }
 
 /**
@@ -417,13 +435,13 @@ function theme_station_playlist_track_form($variables) {
  */
 function station_playlist_node_form_validate($form, &$form_state) {
   $tracks = $form_state['values']['tracks'];
-
+/*
   // Check if a track should be removed.
   if (isset($form_state['clicked_button']['#parents'][2]) && $form_state['clicked_button']['#parents'][2] == 'remove') {
     $delta = $form_state['clicked_button']['#parents'][1];
     unset($tracks[$delta]);
   }
-
+*/
   // Sort the table by weight (which might have changed with a tablesort)
   // then reset the keys.
   usort($tracks, '_station_playlist_sort_tracks');
@@ -433,7 +451,7 @@ function station_playlist_node_form_validate($form, &$form_state) {
   foreach ($tracks as $key => $track) {
     $track['weight'] = $key;
   }
-
+/*
   // Check if they've requested a new track.
   if (isset($form_state['clicked_button']['#parents'][0]) && $form_state['clicked_button']['#parents'][0] == 'add_more') {
     // Add the new row to the tracks list.
@@ -442,7 +460,7 @@ function station_playlist_node_form_validate($form, &$form_state) {
       $tracks[] = $track;
     }
   }
-
+*/
   form_set_value($form['tracks_wrapper']['tracks'], $tracks, $form_state);
 }
 
@@ -475,19 +493,22 @@ function station_playlist_validate(&$node, &$form) {
  * @todo Please document this function.
  * @see http://drupal.org/node/1354
  */
+function station_playlist_ajax_callback($form, &$form_state) {
+  return $form['tracks_wrapper'];
+}
+
 function station_playlist_ahah() {
   // The form is generated in an include file which we need to include manually.
   include_once DRUPAL_ROOT . '/' . 'modules/node/node.pages.inc';
 
   $form = station_ajax_form_handler();
-
   // Render the new output.
   $sub_form = $form['tracks_wrapper'];
   // Prevent duplicate wrappers.
   unset($sub_form['#prefix'], $sub_form['#suffix']);
-
+	
   // TODO Please change this theme call to use an associative array for the $variables parameter.
-  $output = theme(array('display' => 'status_messages')) . drupal_render($sub_form);
+  $output = theme('status_messages', array('display' => 'NULL')) . drupal_render($sub_form);
 
   // AHAH is not being nice to us and doesn't know about the "Remove" button.
   // This causes it not to attach AHAH behaviours to it after modifying the form.
@@ -497,7 +518,7 @@ function station_playlist_ahah() {
     $output .= '<script type="text/javascript">jQuery.extend(Drupal.settings, ' . drupal_json_encode(call_user_func_array('array_merge_recursive', $javascript['setting'])) . ');</script>';
   }
 
-  // Final rendering callback.
+  // Final rendering callback.*/
   drupal_json_output(array('status' => TRUE, 'data' => $output));
 }
 
@@ -578,8 +599,6 @@ function station_playlist_update($node) {
  * Get a playlist ready for viewing.
  */
 function station_playlist_view($node, $view_mode) {
-  //$node = node_prepare($node);
-
   if ($view_mode == 'full') {
     $program_nid = $node->field_station_program[$node->language][0]['nid'];
     $breadcrumb = drupal_get_breadcrumb();
@@ -595,7 +614,7 @@ function station_playlist_view($node, $view_mode) {
       if ($view->access($display_id)) {
         if ($output = $view->preview($display_id, array($node->nid))) {
           $node->content['tracks'] = array(
-            '#value' => $output,
+            '#markup' => $output,
             '#title' => 'Tracks',
             '#weight' => 0,
           );
@@ -648,9 +667,9 @@ function station_playlist_autocomplete($field = '', $string = '') {
 //    $catalog_query->distinct();
 //    $playlist_query = db_select('station_playlist_track', 'st');
 //    $playlist_query->distinct();
-    $catalog_sql  = 'SELECT DISTINCT :field AS val FROM {station_catalog}        WHERE LOWER(:field) LIKE LOWER(:str)';
-    $playlist_sql = 'SELECT DISTINCT :field AS val FROM {station_playlist_track} WHERE LOWER(:field) LIKE LOWER(:str)';
-    $args = array(':field' => $field, ':str' => '%' . $string . '%');
+    $catalog_sql  = "SELECT DISTINCT $field AS val FROM {station_catalog}        WHERE LOWER($field) LIKE LOWER(:str)";
+    $playlist_sql = "SELECT DISTINCT $field AS val FROM {station_playlist_track} WHERE LOWER($field) LIKE LOWER(:str)";
+    $args = array(':str' => '%' . $string . '%');
     switch (variable_get('station_playlist_track_autocomplete_source', 'playlists')) {
       case 'playlists':
         $sql = $playlist_sql;
@@ -671,7 +690,7 @@ function station_playlist_autocomplete($field = '', $string = '') {
       //$result = db_query_range($sql . ' ORDER BY val', $args);
       $result = db_query_range($sql . ' ORDER BY val', 0, 10, $args);
       //while ($item = db_fetch_object($result)) {
-      foreach ($result as $item) {
+      foreach ($result as $key => $item) {
         $matches[$item->val] = check_plain($item->val);
       }
     }
@@ -735,3 +754,4 @@ function _nodereference_titles($nid, $known_title = NULL) {
   }
   return $titles[$nid];
 }
+
