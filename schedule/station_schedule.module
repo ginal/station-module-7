@@ -737,12 +737,13 @@ function station_schedule_user_view($account, $view_mode) {
     );
     foreach ((array) $account->programs as $nid => $title) {
       $node = node_load($nid);
-      $node = node_build_content($node, 'teaser');
+      node_build_content($node, 'teaser');
+      $genre = field_get_items('node', $node,'station_program_genre');
       $account->content['station'][] = array(
         '#type' => 'user_profile_item',
         '#attributes' => array('class' => 'user-member'),
         '#title' => l($title, 'node/' . $nid),
-        '#value' => $node->field_station_program_genre[0]['safe'] . $node->content['station_schedule_times']['#value'],
+        '#markup' => $genre[0]['safe_value'] . $node->content['station_schedule_times']['#markup'],
       );
     }
   }
