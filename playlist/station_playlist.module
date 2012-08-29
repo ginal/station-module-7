@@ -506,7 +506,7 @@ function station_playlist_ahah() {
   $sub_form = $form['tracks_wrapper'];
   // Prevent duplicate wrappers.
   unset($sub_form['#prefix'], $sub_form['#suffix']);
-	
+
   // TODO Please change this theme call to use an associative array for the $variables parameter.
   $output = theme('status_messages', array('display' => 'NULL')) . drupal_render($sub_form);
 
@@ -667,6 +667,7 @@ function station_playlist_autocomplete($field = '', $string = '') {
 //    $catalog_query->distinct();
 //    $playlist_query = db_select('station_playlist_track', 'st');
 //    $playlist_query->distinct();
+    // We have already checked the $field value to prevent any SQL injection attacks.
     $catalog_sql  = "SELECT DISTINCT $field AS val FROM {station_catalog}        WHERE LOWER($field) LIKE LOWER(:str)";
     $playlist_sql = "SELECT DISTINCT $field AS val FROM {station_playlist_track} WHERE LOWER($field) LIKE LOWER(:str)";
     $args = array(':str' => '%' . $string . '%');
